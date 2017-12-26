@@ -2,7 +2,7 @@
 AWSでサーバーレスを構築するための構成ファイル
 
 ## 構成（予定）
-![blueprint_1.png](https://raw.github.com/wiki/websandbag/aws-serverless/images/blueprint_1.png)
+![blueprint_1.png](https://raw.githubusercontent.com/websandbag/aws-serverless/master/images/blueprint_1.png)
 
 ## 準備
 - 開発環境でAWSCLIが使える状態
