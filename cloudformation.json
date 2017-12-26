@@ -1,0 +1,120 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Serverless base",
+    "Metadata": {
+        "S3Bucket": {
+            "Description": "s3 webserver."
+        },
+        "S3BucketPolicy": {
+            "Description": "s3 policy."
+        }
+    },
+    "Parameters": {
+        "EnvType": {
+            "Description": "Enviroment type. Default is test.",
+            "Default": "test",
+            "Type": "String",
+            "AllowedValues": [
+                "prod",
+                "test"
+            ],
+            "ConstraintDescription": "must specify prod or test."
+        },
+        "InstanceType": {
+            "Description": "Enter t2.micro, m1.small, or m1.large. Default is t2.micro.",
+            "Type": "String",
+            "Default": "t2.micro",
+            "AllowedValues": [
+                "t2.micro",
+                "m1.small",
+                "m1.large"
+            ],
+            "ConstraintDescription": "must specify t2.micro, m1.small, or m1.large."
+        }
+    },
+    "Conditions" : {
+        "CreateProdResources" : {
+            "Fn::Equals" : [
+                {"Ref" : "EnvType"}, "prod"
+            ]
+        }
+    },
+    "Resources": {
+        "S3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "WebsiteConfiguration": {
+                    "IndexDocument": "index.html",
+                    "ErrorDocument": "error.html"
+                },
+                "Tags" : [
+                    {
+                        "Key" : "name",
+                        "Value" : "S3Bucket",
+                    }
+                ]
+            },
+        },
+        "S3BucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Id": "MyPolicy",
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "PublicReadForGetBucketObjects",
+                            "Effect": "Allow",
+                            "Principal": "*",
+                            "Action": "s3:GetObject",
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:s3:::",
+                                        {
+                                            "Ref": "S3Bucket"
+                                        },
+                                        "/*"
+                                    ]
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Bucket": {
+                    "Ref": "S3Bucket"
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "WebsiteURL": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "S3Bucket",
+                    "WebsiteURL"
+                ]
+            },
+            "Description": "URL for website hosted on S3"
+        },
+        "S3BucketSecureURL": {
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Fn::GetAtt": [
+                                "S3Bucket",
+                                "DomainName"
+                            ]
+                        }
+                    ]
+                ]
+            },
+            "Description": "Name of S3 bucket to hold website content"
+        }
+    }
+}
